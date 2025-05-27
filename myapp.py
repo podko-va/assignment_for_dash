@@ -9,6 +9,7 @@ countries = df['country'].unique()
 
 # Initialize Dash app
 app = Dash(__name__)
+server = app.server 
 
 # Layout
 app.layout = html.Div([
@@ -42,3 +43,5 @@ def update_graph(selected_country):
 # Run the app
 if __name__ == "__main__": 
     app.run(debug=True) 
+
+
