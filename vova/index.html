@@ -2,8 +2,8 @@
 <html lang="ru">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Truck Control</title>
+    <meta charset="UTF-8">
+    <title>Truck Simulator</title>
     <style>
         body {
             display: flex;
@@ -11,113 +11,167 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f0f0;
-            overflow: hidden;
-            font-family: sans-serif;
+            margin: 0;
+            background-color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #view-title {
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         #road {
             position: relative;
             width: 100%;
-            height: 300px;
-            background: white;
-            border-bottom: 5px solid #333;
+            height: 350px;
+            background: #fff;
+            border-top: 4px solid #333;
+            border-bottom: 15px solid #555;
             overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         #truck {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50px;
-            height: 150px;
-            /* Размер можно подправить */
-            transition: left 0.1s linear;
+            height: 180px;
+            /* Размер для вида сбоку */
+            will-change: left;
+            /* Оптимизация для плавной анимации */
         }
 
         .controls {
-            margin-top: 30px;
+            margin-top: 40px;
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         button {
-            padding: 15px 25px;
-            font-size: 18px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 30px;
             border: none;
             background: #007bff;
             color: white;
-            transition: 0.2s;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
         }
 
         button:active {
-            background: #0056b3;
+            transform: translateY(0);
         }
 
         .view-btn {
             background: #28a745;
         }
+
+        .view-btn:hover {
+            background: #218838;
+        }
+
+        .hint {
+            margin-top: 15px;
+            color: #777;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 
 <body>
+
     <h2 id="view-title">Вид сбоку</h2>
 
     <div id="road">
-        <img id="truck" src="side.jpg" alt="Truck" />
+        <img id="truck" src="side.jpg" alt="Truck">
     </div>
 
     <div class="controls">
-        <button onmousedown="startMove(-10)" onmouseup="stopMove()" ontouchstart="startMove(-10)"
-            ontouchend="stopMove()">
-            ⬅️ Влево
-        </button>
-        <button onclick="toggleView()" class="view-btn">🔄 Сменить вид</button>
-        <button onmousedown="startMove(10)" onmouseup="stopMove()" ontouchstart="startMove(10)" ontouchend="stopMove()">
-            Вправо ➡️
-        </button>
+        <button id="btn-left">⬅️ Назад</button>
+        <button id="btn-view" class="view-btn">🔄 Сменить вид</button>
+        <button id="btn-right">Вперед ➡️</button>
     </div>
 
-    <script>
-        const truck = document.getElementById("truck");
-        const title = document.getElementById("view-title");
+    <p class="hint">Можно использовать стрелки <b>влево</b> и <b>вправо</b> на клавиатуре</p>
 
-        // Ссылки на картинки (замени на свои пути к файлам)
+    <script>
+        const truck = document.getElementById('truck');
+        const title = document.getElementById('view-title');
+
+        // Относительные пути к твоим файлам
         const sideImg = "side.jpg";
         const topImg = "top.jpg";
 
         let currentPos = 50;
-        let moveInterval;
+        let speed = 0;
         let isSideView = true;
 
-        function startMove(step) {
-            moveInterval = setInterval(() => {
-                currentPos += step;
-                // Ограничение, чтобы не уезжал за экран
-                if (currentPos < -200) currentPos = window.innerWidth;
-                if (currentPos > window.innerWidth) currentPos = -200;
+        // Функция анимации (через requestAnimationFrame для максимальной плавности)
+        function update() {
+            if (speed !== 0) {
+                currentPos += speed;
 
-                truck.style.left = currentPos + "px";
-            }, 30);
+                const truckWidth = truck.offsetWidth;
+                const screenWidth = window.innerWidth;
+
+                // Бесконечный цикл: если уехал вправо — выезжает слева
+                if (currentPos > screenWidth) {
+                    currentPos = -truckWidth;
+                }
+                // Если уехал влево — выезжает справа
+                else if (currentPos < -truckWidth) {
+                    currentPos = screenWidth;
+                }
+
+                truck.style.left = currentPos + 'px';
+            }
+            requestAnimationFrame(update);
         }
 
-        function stopMove() {
-            clearInterval(moveInterval);
-        }
+        // Управление мышкой/тачем
+        document.getElementById('btn-left').onmousedown = () => speed = -8;
+        document.getElementById('btn-right').onmousedown = () => speed = 8;
+        window.onmouseup = () => speed = 0;
 
-        function toggleView() {
+        // Управление клавиатурой
+        window.onkeydown = (e) => {
+            if (e.key === "ArrowLeft") speed = -8;
+            if (e.key === "ArrowRight") speed = 8;
+        };
+        window.onkeyup = (e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") speed = 0;
+        };
+
+        // Смена вида
+        document.getElementById('btn-view').onclick = () => {
             isSideView = !isSideView;
             if (isSideView) {
                 truck.src = sideImg;
-                truck.style.height = "150px";
+                truck.style.height = "180px";
                 title.innerText = "Вид сбоку";
             } else {
                 truck.src = topImg;
-                truck.style.height = "100px"; // Вид сверху обычно уже
+                truck.style.height = "120px";
                 title.innerText = "Вид сверху";
             }
-        }
+        };
+
+        // Запуск цикла анимации
+        update();
     </script>
 </body>
 
