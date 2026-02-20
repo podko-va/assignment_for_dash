@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Truck Control</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #road {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: white;
+            border-bottom: 5px solid #333;
+            overflow: hidden;
+        }
+
+        #truck {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            height: 150px;
+            /* Размер можно подправить */
+            transition: left 0.1s linear;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background: #007bff;
+            color: white;
+            transition: 0.2s;
+        }
+
+        button:active {
+            background: #0056b3;
+        }
+
+        .view-btn {
+            background: #28a745;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 id="view-title">Вид сбоку</h2>
+
+    <div id="road">
+        <img id="truck" src="side.jpg" alt="Truck" />
+    </div>
+
+    <div class="controls">
+        <button onmousedown="startMove(-10)" onmouseup="stopMove()" ontouchstart="startMove(-10)"
+            ontouchend="stopMove()">
+            ⬅️ Влево
+        </button>
+        <button onclick="toggleView()" class="view-btn">🔄 Сменить вид</button>
+        <button onmousedown="startMove(10)" onmouseup="stopMove()" ontouchstart="startMove(10)" ontouchend="stopMove()">
+            Вправо ➡️
+        </button>
+    </div>
+
+    <script>
+        const truck = document.getElementById("truck");
+        const title = document.getElementById("view-title");
+
+        // Ссылки на картинки (замени на свои пути к файлам)
+        const sideImg = "side.jpg";
+        const topImg = "top.jpg";
+
+        let currentPos = 50;
+        let moveInterval;
+        let isSideView = true;
+
+        function startMove(step) {
+            moveInterval = setInterval(() => {
+                currentPos += step;
+                // Ограничение, чтобы не уезжал за экран
+                if (currentPos < -200) currentPos = window.innerWidth;
+                if (currentPos > window.innerWidth) currentPos = -200;
+
+                truck.style.left = currentPos + "px";
+            }, 30);
+        }
+
+        function stopMove() {
+            clearInterval(moveInterval);
+        }
+
+        function toggleView() {
+            isSideView = !isSideView;
+            if (isSideView) {
+                truck.src = sideImg;
+                truck.style.height = "150px";
+                title.innerText = "Вид сбоку";
+            } else {
+                truck.src = topImg;
+                truck.style.height = "100px"; // Вид сверху обычно уже
+                title.innerText = "Вид сверху";
+            }
+        }
+    </script>
+</body>
+
+</html>
